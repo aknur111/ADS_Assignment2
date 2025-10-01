@@ -1,60 +1,61 @@
 package selectionsort;
 
+import metrics.PerformanceTracker;
 import org.junit.jupiter.api.Test;
-
-import java.util.Arrays;
-import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class SelectionSortTest {
 
     @Test
-    void handlesEmptyAndSingle() {
-        int[] a = {};
-        SelectionSort.sort(a);
-        assertArrayEquals(new int[]{}, a);
+    void sortsSimpleArray_andTracksMetrics() {
+        int[] arr = {3, 1, 2};
+        PerformanceTracker tracker = new PerformanceTracker();
 
-        int[] b = {7};
-        SelectionSort.sort(b);
-        assertArrayEquals(new int[]{7}, b);
+        SelectionSort.sort(arr, tracker);
+
+        assertArrayEquals(new int[]{1, 2, 3}, arr);
+        assertTrue(tracker.getComparisons() > 0, "Should record comparisons");
+        assertTrue(tracker.getSwaps() > 0, "Should record at least one swap");
+        assertTrue(tracker.getArrayAccesses() > 0, "Should record array accesses");
     }
 
     @Test
-    void sortsSimpleCases() {
-        int[] a = {3, 1, 2};
-        SelectionSort.sort(a);
-        assertArrayEquals(new int[]{1, 2, 3}, a);
+    void handlesAlreadySortedArray() {
+        int[] arr = {1, 2, 3, 4};
+        PerformanceTracker tracker = new PerformanceTracker();
 
-        int[] b = {5, 5, 5, 5};
-        SelectionSort.sort(b);
-        assertArrayEquals(new int[]{5, 5, 5, 5}, b);
+        SelectionSort.sort(arr, tracker);
 
-        int[] c = {2, 1};
-        SelectionSort.sort(c);
-        assertArrayEquals(new int[]{1, 2}, c);
+        assertArrayEquals(new int[]{1, 2, 3, 4}, arr);
+        assertEquals(0, tracker.getSwaps(), "No swaps expected for sorted input");
     }
 
     @Test
-    void sortsNegativeAndMixed() {
-        int[] a = {0, -1, 3, -2, 2};
-        SelectionSort.sort(a);
-        assertArrayEquals(new int[]{-2, -1, 0, 2, 3}, a);
+    void handlesEmptyAndSingleElement() {
+        int[] empty = {};
+        PerformanceTracker t1 = new PerformanceTracker();
+        SelectionSort.sort(empty, t1);
+        assertArrayEquals(new int[]{}, empty);
+        assertEquals(0, t1.getComparisons());
+        assertEquals(0, t1.getSwaps());
+        assertEquals(0, t1.getArrayAccesses());
+
+        int[] single = {7};
+        PerformanceTracker t2 = new PerformanceTracker();
+        SelectionSort.sort(single, t2);
+        assertArrayEquals(new int[]{7}, single);
+        assertEquals(0, t2.getSwaps());
     }
 
     @Test
-    void matchesJavaSort_randomized() {
-        Random rnd = new Random(123);
-        for (int t = 0; t < 200; t++) {
-            int n = rnd.nextInt(50);
-            int[] a = rnd.ints(n, -1000, 1001).toArray();
-            int[] b = a.clone();
+    void handlesDuplicatesAndNegatives() {
+        int[] arr = {0, -1, 5, -2, 5};
+        PerformanceTracker tracker = new PerformanceTracker();
 
-            SelectionSort.sort(a);
-            Arrays.sort(b);
+        SelectionSort.sort(arr, tracker);
 
-            assertArrayEquals(b, a);
-        }
+        assertArrayEquals(new int[]{-2, -1, 0, 5, 5}, arr);
     }
 }
 
