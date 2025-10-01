@@ -27,7 +27,6 @@ class MaxHeapTest {
         heap.insert(6);
         heap.insert(2);
         heap.insert(5);
-        // теперь увеличим ключ у индекса 2 (который был 2) до 100
         heap.increaseKey(2, 100);
         assertEquals(100, heap.extractMax());
         assertEquals(6, heap.extractMax());
